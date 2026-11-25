@@ -173,3 +173,37 @@ export const CALL_NAME: Record<string, string> = {
 }
 
 export const RESULT_NAME: Record<string, string> = { ron: '론', tsumo: '쯔모', draw: '유국' }
+
+// ---- 재생 화면(앱 lib/ui/paifu/paifu_screen.dart 와 같은 규칙) ----
+
+/** 몇 순째인가: 가장 많이 버린 자리의 버림 수(울려 나간 패 포함). 앱 PaifuState.turn. */
+export const turnOf = (s: PaifuState) => Math.max(...s.rivers.map((r) => r.length))
+
+/** 자리의 바람(0 동 · 1 남 · 2 서 · 3 북). */
+export const windOf = (p: PaifuRaw, seat: number) => (((seat - (p.dealer ?? 0)) % 4) + 4) % 4
+
+/** hero 의 판 중 손패가 한 순이라도 적혀 있는가. 버림만 적은 패보면 false. */
+export const hasHeroHands = (p: PaifuRaw) =>
+  !!p.start_hand || (p.events ?? []).some((e) => e.seat === p.hero && !!e.hand)
+
+/** 결과에 적힌 울기 묶음. 목록이면 4장 = 깡, 모두 같은 패 = 퐁, 아니면 치(앱 PaifuResultMeld). */
+export function resultMelds(p: PaifuRaw): { kind: string; tiles: string[] }[] {
+  return (p.result?.melds ?? []).flatMap((m) => {
+    if (Array.isArray(m)) {
+      if (!m.length) return []
+      const same = m.every((t) => sameTile(t, m[0]))
+      return [{ kind: m.length === 4 ? 'kan' : same ? 'pon' : 'chi', tiles: m }]
+    }
+    return [{ kind: m.kind ?? 'pon', tiles: m.tiles ?? [] }]
+  })
+}
+
+/** 그 자리의 울기. 끝 걸음의 화료자는 결과에 적힌 묶음으로(앱 _meldsOf — 준 자리를 모르면 상가로 눕힘). */
+export function meldsOf(p: PaifuRaw, s: PaifuState, seat: number): Meld[] {
+  const r = p.result
+  const rm = resultMelds(p)
+  if (s.finished && r && r.winner === seat && rm.length) {
+    return rm.map((m) => ({ kind: m.kind, tiles: m.tiles, from: m.kind === 'ankan' ? seat : (seat + 3) % 4 }))
+  }
+  return s.melds[seat]
+}
