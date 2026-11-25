@@ -1,11 +1,14 @@
 // 패보 재생 화면. 앱 lib/ui/paifu/paifu_screen.dart 의 재생 화면(PaifuTableView + 오른쪽 패널)과 같은 구성:
 // 넓은 화면은 왼쪽 탁자 + 오른쪽 패널, 좁은 화면은 탁자 위 + 패널 아래.
-// 앱의 "점수 결과 보기"(점수 계산 엔진)와 걸음 옆 등급(복기 엔진)은 없다 — 끝 걸음에 패보에 적힌 결과 한 줄만.
+// 앱의 "점수 결과 보기"(점수 계산 엔진) · 걸음 옆 등급 · 수 평가 카드 · 판 요약(복기 엔진)은 앱 엔진을 JS 로 묶은
+// public/engine/mj_engine.js 를 이 화면에 들어올 때만 불러 붙인다(engine.ts). 못 불러오면 엔진 칸만 빠지고 나머지는 그대로.
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useApi } from '../api'
 import { Status } from '../components/common'
+import { ReviewBadge, ScoreDialog, StageCard, SummaryCard, TurnCard } from '../components/EngineViews'
 import { PaifuTable, TABLE_H, TABLE_W } from '../components/PaifuTable'
 import { Tile } from '../components/Tile'
+import { useEngine, type EngineState } from '../engine'
 import { WINDS } from '../format'
 import {
   RESULT_NAME,
@@ -87,6 +90,18 @@ function Replay({ p, names, title, back }: { p: PaifuRaw; names: string[]; title
   const wide = useMedia(WIDE_QUERY)
   const [boxRef, w] = useTableW(wide)
   const listRef = useRef<HTMLOListElement>(null)
+  const seatLabel = useCallback(
+    (seat: number) => `${WINDS[windOf(p, seat)]}${names[seat] ? ` ${names[seat]}` : ''}`,
+    [p, names],
+  )
+  const labels = useMemo(() => [0, 1, 2, 3].map(seatLabel), [seatLabel])
+  const eng = useEngine(p, labels)
+  const ready = eng.status === 'ready' ? eng : null
+  const review = ready?.review ?? null
+  const scoreDetail = ready?.score?.kind === 'win' ? (ready.score.score ?? null) : null
+  const canScore = !!scoreDetail?.valid
+  const [scoreOpen, setScoreOpen] = useState(false)
+  const closeScore = useCallback(() => setScoreOpen(false), [])
 
   const go = useCallback((n: number) => setStep(Math.max(0, Math.min(last, n))), [last])
   const play = useCallback(() => {
@@ -124,6 +139,7 @@ function Replay({ p, names, title, back }: { p: PaifuRaw; names: string[]; title
   useEffect(() => {
     const on = (e: KeyboardEvent) => {
       if (e.ctrlKey || e.metaKey || e.altKey) return
+      if (scoreOpen) return
       const t = e.target as HTMLElement | null
       const tag = t?.tagName
       if (tag === 'TEXTAREA' || tag === 'SELECT' || t?.isContentEditable) return
@@ -133,7 +149,9 @@ function Replay({ p, names, title, back }: { p: PaifuRaw; names: string[]; title
         case 'ArrowRight':
           if (range) return
           e.preventDefault()
-          go(step + 1)
+          // 앱처럼 끝 걸음에서 한 번 더 → 점수 결과.
+          if (step >= last && canScore) setScoreOpen(true)
+          else go(step + 1)
           break
         case 'ArrowLeft':
           if (range) return
@@ -168,10 +186,9 @@ function Replay({ p, names, title, back }: { p: PaifuRaw; names: string[]; title
     }
     window.addEventListener('keydown', on)
     return () => window.removeEventListener('keydown', on)
-  }, [go, step, last, heroTurn, toggle])
+  }, [go, step, last, heroTurn, toggle, scoreOpen, canScore])
 
   const s = states[step]
-  const seatLabel = (seat: number) => `${WINDS[windOf(p, seat)]}${names[seat] ? ` ${names[seat]}` : ''}`
   const describe = (x: PaifuState) => describeStep(x, p, seatLabel)
 
   return (
@@ -184,6 +201,15 @@ function Replay({ p, names, title, back }: { p: PaifuRaw; names: string[]; title
           {title} <small>패보</small>
         </h1>
       </div>
+      {review?.summary.hasHeroHands && (
+        <SummaryCard
+          s={review.summary}
+          onLesson={(n) => {
+            setPlaying(false)
+            go(n)
+          }}
+        />
+      )}
       <div className={`pf-stage ${wide ? 'wide' : 'narrow'}`}>
         <div className="pf-tablebox" ref={boxRef}>
           {w > 0 && <PaifuTable p={p} s={s} names={names} w={w} />}
@@ -197,6 +223,7 @@ function Replay({ p, names, title, back }: { p: PaifuRaw; names: string[]; title
           <p className="pf-now" aria-live="polite">
             {describe(s)}
           </p>
+          <EngineCard eng={eng} step={step} />
           <input
             type="range"
             min={0}
@@ -250,6 +277,17 @@ function Replay({ p, names, title, back }: { p: PaifuRaw; names: string[]; title
             </span>
           </div>
           {s.finished && p.result && <ResultLine p={p} seatLabel={seatLabel} />}
+          {s.finished && scoreDetail && (
+            <div className="eg-score">
+              {scoreDetail.valid ? (
+                <button type="button" className="eg-score-btn" onClick={() => setScoreOpen(true)}>
+                  점수 결과 보기 · {scoreDetail.payment.total}점
+                </button>
+              ) : (
+                <p className="eg-score-err">점수를 계산할 수 없는 기록입니다 — {scoreDetail.error}</p>
+              )}
+            </div>
+          )}
           <p className="pf-legend">어두운 패 = 쯔모기리 · 누운 패 = 리치 선언 · 테두리 = 방금 버린 패</p>
           {p.note && (
             <p className="pf-note" title={p.note}>
@@ -260,6 +298,7 @@ function Replay({ p, names, title, back }: { p: PaifuRaw; names: string[]; title
             {states.map((x, i) => {
               const mine = x.event?.seat === p.hero
               const now = i === step
+              const t = review?.summary.hasNumbers ? ready?.byStep.get(i) : undefined
               return (
                 <li key={i} style={{ height: ROW_H }}>
                   <button
@@ -270,6 +309,7 @@ function Replay({ p, names, title, back }: { p: PaifuRaw; names: string[]; title
                   >
                     <span className="pf-log-n">{i}</span>
                     <span className="pf-log-t">{describe(x)}</span>
+                    {t && <ReviewBadge t={t} />}
                   </button>
                 </li>
               )
@@ -277,8 +317,25 @@ function Replay({ p, names, title, back }: { p: PaifuRaw; names: string[]; title
           </ol>
         </aside>
       </div>
+      {scoreOpen && scoreDetail?.valid && (
+        <ScoreDialog
+          s={scoreDetail}
+          who={`${p.result?.type === 'tsumo' ? '쯔모' : '론'} · ${seatLabel(p.result?.winner ?? 0)}`}
+          onClose={closeScore}
+        />
+      )}
     </div>
   )
+}
+
+/** 지금 걸음의 엔진 카드: 내 버림이면 평가 카드, 아니면 단계 걸음(배패 · 리치 · 끝)의 글. 엔진이 없으면 아무것도. */
+function EngineCard({ eng, step }: { eng: EngineState; step: number }) {
+  if (eng.status !== 'ready' || !eng.review) return null
+  const t = eng.byStep.get(step)
+  if (t) return <TurnCard t={t} />
+  const st = eng.review.stages.find((x) => x.step === step)
+  if (st) return <StageCard name={st.name} sentence={st.sentence} />
+  return null
 }
 
 function IconBtn({ label, onClick, children }: { label: string; onClick: () => void; children: ReactNode }) {

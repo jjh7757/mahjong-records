@@ -130,6 +130,22 @@ psql -U mahjong -d mahjong -v ON_ERROR_STOP=1 -f out/import_mavely.sql          
 - 마블리 값: `rate` = 최종 점수 − 25000(합 = −deposit, 남은 공탁), `uma` = rate/1000 을 0 쪽으로 버림 + 20/10/−10/−20 → `score` 그대로.
   국별 사건 · 패보는 없다(`manual` 참). 목록 · 상세 응답의 `source` 가 `mavely`.
 
+## 점수 · 복기 엔진(앱 Dart 엔진을 JS 로)
+
+패보 재생 화면의 "점수 결과 보기" · 걸음 옆 등급 배지 · 수 평가 카드 · 복기 요약은 앱의 순수 Dart 엔진
+(`lib/engine` · `lib/paifu` 의 `scoreOf` · `reviewPaifu` · `review_sentence.dart`)을 `dart compile js -O2` 로 묶은
+`web/public/engine/mj_engine.js`(약 165KB, gzip 약 54KB)가 낸다 — 로직을 TS 로 옮기지 않았다.
+진입점은 앱 저장소 `tool/web_engine/web_engine.dart`(전역 `mjEngine.score(json)` · `mjEngine.review(json, options?)` ·
+`version` · `apiVersion`, 실패는 던지지 않고 `{"error"}`). 패보 화면에 들어올 때만 불러오고(`web/src/engine.ts`),
+못 불러오면 엔진 칸만 빠진다.
+
+```bash
+scripts/build_engine.sh              # ../mahjong_calc 에서 묶기 + assets 22판 대조(Dart VM ↔ JS) + ENGINE_SOURCE.txt · web/src/engineBuild.ts
+```
+
+산출 `mj_engine.js` · `ENGINE_SOURCE.txt`(앱 sha · 작업 트리 상태 · 묶음에 든 파일) · `web/src/engineBuild.ts`(캐시용 해시)는 커밋한다
+(사이트 CI · Docker 빌드에 Dart 가 없다). 룰은 앱 기본값(`RuleSet.standard`) — 앱에서 룰을 바꾼 매장은 점수가 다를 수 있다.
+
 ## 알려진 한계
 
 - 관리자 로그인 잠금은 전역(관리자 한 명)이라, 누가 일부러 틀리면 관리자도 15분 못 들어간다.

@@ -1353,3 +1353,385 @@ tbody tr:last-child td {
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+/* 엔진 칸(점수 결과 · 등급 배지 · 수 평가 카드 · 판 요약) — components/EngineViews.tsx */
+.eg-icon {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid #fff;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+.eg-badge {
+  flex: none;
+  margin-left: 6px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+.eg-badge.def {
+  background: #4a4458;
+  color: #e8def8;
+}
+.eg-badge.done {
+  background: #633b48;
+  color: #ffd8e4;
+}
+.eg-card {
+  margin: 8px 0 2px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: var(--pf-surface);
+  border: 1px solid var(--pf-line);
+  max-height: 260px;
+  overflow-y: auto;
+  flex: none;
+}
+.eg-card-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.eg-card-title {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.eg-corner {
+  flex: none;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: var(--pf-text);
+  color: var(--pf-bg);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+.eg-line {
+  margin: 2px 0 0;
+  font-weight: 500;
+}
+.eg-sentence {
+  margin: 4px 0 0;
+  color: var(--pf-text);
+  line-height: 1.4;
+}
+.eg-cands {
+  margin-top: 8px;
+  padding-top: 6px;
+  border-top: 1px solid var(--pf-line);
+  display: grid;
+  gap: 3px;
+  font-size: 0.86rem;
+}
+.eg-cands-h {
+  font-weight: 700;
+}
+.eg-cand {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.eg-cand.actual .eg-cand-t {
+  font-weight: 700;
+}
+.eg-cand-t {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.eg-tag {
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+.eg-tag.actual {
+  color: var(--pf-gold);
+}
+.eg-tag.best {
+  color: #7fd18a;
+}
+.eg-score {
+  margin-top: 8px;
+}
+.eg-score-btn {
+  appearance: none;
+  width: 100%;
+  min-height: 44px;
+  border: 0;
+  border-radius: 22px;
+  background: #3f6f55;
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+.eg-score-btn:hover {
+  background: #4b8264;
+}
+.eg-score-btn:focus-visible {
+  outline: 2px solid var(--pf-gold);
+  outline-offset: 2px;
+}
+.eg-score-err {
+  margin: 0;
+  color: #ffb4a9;
+  font-size: 0.88rem;
+}
+.eg-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgba(0, 0, 0, 0.55);
+  display: grid;
+  place-items: center;
+  padding: 16px;
+}
+.eg-dialog {
+  width: min(460px, 100%);
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+  background: var(--card);
+  color: var(--text);
+  border-radius: 16px;
+  padding: 14px 16px 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  outline: none;
+}
+.eg-dialog-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.eg-dialog-head b {
+  font-size: 1.15rem;
+}
+.eg-close {
+  margin-left: auto;
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 1.1rem;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+.eg-close:hover {
+  background: var(--line);
+}
+.eg-muted {
+  color: var(--muted);
+}
+.eg-hand {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 1px;
+}
+.eg-gap {
+  width: 6px;
+}
+.eg-meld {
+  display: inline-flex;
+  gap: 1px;
+  margin-left: 6px;
+  padding: 2px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+.eg-sit {
+  margin: 6px 0 8px;
+  font-size: 0.88rem;
+}
+.eg-yaku {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.eg-yaku li {
+  display: flex;
+  justify-content: space-between;
+  padding: 3px 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+.eg-yaku li b {
+  color: var(--accent);
+}
+.eg-hanfu {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid var(--line);
+  margin-top: 8px;
+  padding-top: 8px;
+  min-height: 34px;
+}
+.eg-stamp {
+  padding: 2px 10px;
+  border: 2px solid var(--neg);
+  color: var(--neg);
+  border-radius: 6px;
+  font-weight: 800;
+  transform: rotate(-6deg);
+}
+.eg-points {
+  margin: 6px 0 0;
+  font-size: 2.2rem;
+  font-weight: 800;
+  line-height: 1.1;
+}
+.eg-pay {
+  margin: 2px 0 0;
+}
+.eg-fu {
+  margin-top: 10px;
+}
+.eg-fu summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+.eg-fu ul {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+}
+.eg-fu li {
+  display: flex;
+  justify-content: space-between;
+  padding: 2px 0;
+}
+.eg-fu li.sum {
+  border-top: 1px solid var(--line);
+  font-weight: 600;
+}
+.eg-rules {
+  margin: 10px 0 0;
+  font-size: 0.8rem;
+}
+.eg-summary {
+  margin: 0 0 10px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+}
+.eg-summary > summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 14px;
+  padding: 10px 14px;
+  cursor: pointer;
+  list-style: none;
+}
+.eg-summary > summary::-webkit-details-marker {
+  display: none;
+}
+.eg-summary > summary::after {
+  content: '펼치기 ▾';
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+.eg-summary[open] > summary::after {
+  content: '접기 ▴';
+}
+.eg-sum-title {
+  font-weight: 700;
+}
+.eg-pct b {
+  font-size: 1.35rem;
+  font-weight: 800;
+  margin-left: 2px;
+}
+.eg-sum-grades {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+.eg-sum-grades > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.eg-sum-grades .zero,
+.eg-grade-table .zero {
+  opacity: 0.38;
+}
+.eg-sum-body {
+  padding: 0 14px 12px;
+  border-top: 1px solid var(--line);
+}
+.eg-sum-body p {
+  margin: 8px 0 0;
+}
+.eg-sum-body h3 {
+  margin: 14px 0 4px;
+  font-size: 1rem;
+}
+.eg-grade-table {
+  margin-top: 10px;
+  border-collapse: collapse;
+  width: min(320px, 100%);
+}
+.eg-grade-table th {
+  text-align: left;
+  font-weight: 500;
+  padding: 3px 0;
+  width: 90px;
+}
+.eg-grade-table td.n {
+  text-align: right;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.eg-skip-h {
+  display: inline-block;
+  min-width: 72px;
+}
+.eg-lessons {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.eg-lessons button {
+  appearance: none;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 4px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 8px;
+  min-height: 44px;
+}
+.eg-lessons button:hover {
+  background: var(--accent-soft);
+}
+.eg-lessons .t {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.eg-lessons .loss {
+  color: var(--muted);
+}
