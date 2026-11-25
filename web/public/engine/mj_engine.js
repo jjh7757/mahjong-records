@@ -3181,7 +3181,7 @@ if(typeof o=="function")A.a8(A.P(q))
 t=function(a,b){return function(c,d){return a(b,c,d,arguments.length)}}(A.jq,o)
 t[s]=o
 p.review=t
-p.version="mahjong_calc@86208ca"
+p.version="mahjong_calc@dfa2425"
 p.apiVersion=1
 o=v.G
 o.mjEngine=p

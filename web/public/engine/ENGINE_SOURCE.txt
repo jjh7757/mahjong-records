@@ -1,16 +1,10 @@
 원본: /c/Users/jjh7757/dev/mahjong_calc/tool/web_engine/web_engine.dart (앱 저장소 jjh7757/mahjong_calc)
-앱 저장소 HEAD: 86208caf53434407a93d2685f18512e4c54305d7 (exp/on-device-read)
+앱 저장소 HEAD: dfa2425d62e7e836e0d88331373e235a8b3ec5f5 (exp/on-device-read)
 작업 트리 깨끗함: no
-주의: tool/web_engine 은 커밋 전 — HEAD 에는 진입점이 없다(아래 목록의 ?? 파일).
 묶음에 든 앱 파일(26개): lib/engine/agari_rate.dart lib/engine/calculator.dart lib/engine/decompose.dart lib/engine/discard_rank.dart lib/engine/efficiency.dart lib/engine/fu.dart lib/engine/hand.dart lib/engine/hand_value.dart lib/engine/improve.dart lib/engine/meld.dart lib/engine/mh_player.dart lib/engine/risk.dart lib/engine/risk_calibration.dart lib/engine/risk_data.dart lib/engine/score.dart lib/engine/shanten.dart lib/engine/tenpai_rate.dart lib/engine/tile.dart lib/engine/yaku.dart lib/paifu/mh_context.dart lib/paifu/paifu.dart lib/paifu/paifu_review.dart lib/paifu/paifu_score.dart lib/paifu/review_sentence.dart tool/web_engine/engine_api.dart tool/web_engine/web_engine.dart
-그중 커밋 안 된 변경(tool/web_engine 포함):
-  ?? tool/web_engine/compare.mjs
-  ?? tool/web_engine/compare_js.mjs
-  ?? tool/web_engine/compare_vm.dart
-  ?? tool/web_engine/engine_api.dart
-  ?? tool/web_engine/web_engine.dart
-만든 때(UTC): 2026-11-25T08:32:48Z
-명령: dart compile js -O2 -DENGINE_SHA=86208ca tool/web_engine/web_engine.dart
+그중 커밋 안 된 변경: 없음
+만든 때(UTC): 2026-11-25T08:34:01Z
+명령: dart compile js -O2 -DENGINE_SHA=dfa2425 tool/web_engine/web_engine.dart
 dart: Dart SDK version: 3.13.5 (stable) (Tue Sep 29 01:00:52 2026 -0700) on "windows_x64"
 크기: 168409 바이트
 룰: RuleSet.standard(쿠이탄 있음 · 끌어올림 만관 없음 · 헤아림 역만 있음 · 더블 역만 있음 · 연풍패 머리 4부 · 적도라 있음)
