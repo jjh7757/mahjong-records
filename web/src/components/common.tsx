@@ -27,6 +27,9 @@ export function RankBadge({ rank }: { rank: number }) {
   return <span className={`rank-badge r${rank}`}>{rank}</span>
 }
 
+/** 다른 사이트에서 가져온 대국의 출처 표시. */
+export const SOURCE_NAME: Record<string, string> = { mavely: '마블리' }
+
 /** 대국 한 줄: 날짜 + 네 사람(순위 순) 최종 점수 · 정산. */
 export function GameCard({ g, highlight }: { g: GameSummary; highlight?: string }) {
   const players = g.players.slice().sort((a, b) => a.rank - b.rank)
@@ -36,7 +39,11 @@ export function GameCard({ g, highlight }: { g: GameSummary; highlight?: string 
         <span className="gc-date">{fmtDateTime(g.started_at)}</span>
         <span className="gc-tags">
           {g.east_only && <span className="tag">동풍</span>}
-          {g.manual && <span className="tag muted">직접 입력</span>}
+          {g.source ? (
+            <span className="tag muted">{SOURCE_NAME[g.source] ?? g.source}</span>
+          ) : (
+            g.manual && <span className="tag muted">직접 입력</span>
+          )}
           {g.paifu_count > 0 && <span className="tag accent">패보 {g.paifu_count}</span>}
         </span>
       </div>

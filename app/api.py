@@ -139,15 +139,17 @@ def _game_summaries(conn, rows) -> list[dict]:
             "east_only": east_only,
             "finished": finished,
             "paifu_count": paifu_count,
+            "source": source,
             "players": players[gid],
         }
-        for gid, started, ended_by, manual, east_only, finished, paifu_count in rows
+        for gid, started, ended_by, manual, east_only, finished, paifu_count, source in rows
     ]
 
 
 _SUMMARY_COLS = (
     "g.id, g.started_at, g.ended_by, g.manual, g.east_only, g.finished, "
-    "(SELECT count(*) FROM app.paifu_round r WHERE r.game_id = g.id)::int"
+    "(SELECT count(*) FROM app.paifu_round r WHERE r.game_id = g.id)::int, "
+    "g.settings->>'source'"  # 다른 사이트에서 가져온 대국이면 'mavely' 등, 앱이 올린 대국은 null
 )
 
 
@@ -212,7 +214,7 @@ def game_detail(request: Request, game_id: int):
     with _pool(request).connection() as conn:
         g = conn.execute(
             "SELECT g.id, g.started_at, g.finished, g.ended_by, g.manual, g.east_only, g.settings, g.uploaded_at, "
-            "g.updated_at, g.app_version, s.name FROM app.game g JOIN app.store s ON s.id = g.store_id "
+            "g.updated_at, g.app_version, s.name, g.settings->>'source' FROM app.game g JOIN app.store s ON s.id = g.store_id "
             "WHERE g.id = %s AND NOT g.hidden",
             (game_id,),
         ).fetchone()
@@ -228,7 +230,7 @@ def game_detail(request: Request, game_id: int):
             "FROM app.paifu_round WHERE game_id = %s ORDER BY seq",
             (game_id,),
         ).fetchall()
-    gid, started, finished, ended_by, manual, east_only, settings, uploaded, updated, app_version, store = g
+    gid, started, finished, ended_by, manual, east_only, settings, uploaded, updated, app_version, store, source = g
     return {
         "id": gid,
         "started_at": started.isoformat(),
@@ -238,6 +240,7 @@ def game_detail(request: Request, game_id: int):
         "east_only": east_only,
         "settings": settings,
         "store": store,
+        "source": source,
         "uploaded_at": uploaded.isoformat(),
         "updated_at": updated.isoformat(),
         "app_version": app_version,

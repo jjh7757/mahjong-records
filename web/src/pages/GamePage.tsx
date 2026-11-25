@@ -70,7 +70,8 @@ export function GamePage({ id }: { id: number }) {
         <p className="sub">
           {g.east_only ? '동풍전' : '반장전'}
           {g.ended_by && ` · ${g.ended_by}`}
-          {` · ${g.store}`}
+          {g.store !== g.ended_by && ` · ${g.store}`}
+          {g.settings.season && ` · ${g.settings.season}`}
         </p>
       </div>
 
@@ -139,6 +140,9 @@ export function GamePage({ id }: { id: number }) {
             </span>
           ))}
         </div>
+        {hands.length === 0 && (
+          <p className="hint">{g.source ? '가져온 대국이라 최종 결과만 있습니다.' : '국별 기록이 없습니다.'}</p>
+        )}
         <ol className="hands">
           {hands.map((h, i) => (
             <li key={i} className="hand">

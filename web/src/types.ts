@@ -33,6 +33,8 @@ export interface GameSummary {
   east_only: boolean
   finished: boolean
   paifu_count: number
+  /** 다른 사이트에서 가져온 대국의 출처('mavely' 등). 앱이 올린 대국은 null. */
+  source: string | null
   players: Player[]
 }
 
@@ -52,6 +54,8 @@ export interface GameSettings {
   umaSmall?: number
   eastOnly?: boolean
   roundingMode?: number
+  source?: string
+  season?: string
 }
 
 // ---- 패보(앱 lib/paifu/paifu.dart, version 1) ----
@@ -121,6 +125,7 @@ export interface GameDetail {
   east_only: boolean
   settings: GameSettings
   store: string
+  source: string | null
   uploaded_at: string
   updated_at: string
   app_version: string | null

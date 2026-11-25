@@ -116,6 +116,20 @@ curl -b jar -H 'X-Requested-With: x' -H 'Content-Type: application/json' \
    `python scripts/smoke.py https://mahjong.ai-agent-develop.cloud --paifu-dir … --cleanup`(시험 대국을 올리고 숨김 · 시험 키 폐기).
 8. TIL `환경정보.md` · `monitor.sh` 에 앱 추가.
 
+## 마블리 대국 가져오기
+
+다른 기록 사이트(마블리)에서 받아 둔 대국을 넣는 SQL 을 만든다(`scripts/import_mavely.py`, DB 에 붙지 않음 · 표준 라이브러리만).
+
+```bash
+python scripts/import_mavely.py ../mahjong_calc/experiments/mavely/results/mavely_games.json   # → out/import_mavely.sql
+psql -U mahjong -d mahjong -v ON_ERROR_STOP=1 -f out/import_mavely.sql                        # 한 트랜잭션
+```
+
+- 매장 `마블리 가져옴`(key_hash `import-only:mavely`, 처음부터 폐기 — 업로드에 못 씀)의 대국으로 넣는다. `client_game_id` = `mavely-<id>`.
+- 이미 있는 대국은 건너뛴다(여러 번 부어도 같은 결과). 원본이 바뀌어도 고치지 않는다 — 고치려면 그 대국을 지우고 다시 붓는다.
+- 마블리 값: `rate` = 최종 점수 − 25000(합 = −deposit, 남은 공탁), `uma` = rate/1000 을 0 쪽으로 버림 + 20/10/−10/−20 → `score` 그대로.
+  국별 사건 · 패보는 없다(`manual` 참). 목록 · 상세 응답의 `source` 가 `mavely`.
+
 ## 알려진 한계
 
 - 관리자 로그인 잠금은 전역(관리자 한 명)이라, 누가 일부러 틀리면 관리자도 15분 못 들어간다.

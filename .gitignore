@@ -7,3 +7,4 @@ __pycache__/
 !deploy/env.example
 web/node_modules/
 web/dist/
+out/
