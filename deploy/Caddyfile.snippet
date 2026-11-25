@@ -1,0 +1,5 @@
+# 기존 mahjong.ai-agent-develop.cloud { ... } 블록 안, 판독 서버로 넘기는 handle/reverse_proxy 보다 앞에 넣는다.
+# 경로를 떼지 않고(/records 그대로) 넘긴다 — 앱이 /records 접두어를 안다. handle_path 를 쓰지 말 것.
+	handle /records* {
+		reverse_proxy mahjong-records:8000
+	}

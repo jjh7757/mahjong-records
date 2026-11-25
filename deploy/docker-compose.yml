@@ -1,0 +1,28 @@
+# /srv/mahjong-records/docker-compose.yml — TIL AWS배포환경/templates/app-compose.yml 기반.
+# deploy-app 스크립트가 ECR_REGISTRY / APP_NAME / IMAGE_TAG 를 넣어 준다.
+services:
+  app:
+    image: ${ECR_REGISTRY}/${APP_NAME}:${IMAGE_TAG:-latest}
+    container_name: ${APP_NAME}
+    restart: unless-stopped
+    env_file:
+      - .env          # DATABASE_URL · ADMIN_PASSWORD_HASH · SESSION_SECRET — 서버에만 두고 커밋하지 않는다
+    networks:
+      - web
+    # 호스트 포트를 열지 않는다. 외부 노출은 Caddy 만(handle /records*).
+    expose:
+      - "8000"
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8000/records/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+networks:
+  web:
+    external: true
